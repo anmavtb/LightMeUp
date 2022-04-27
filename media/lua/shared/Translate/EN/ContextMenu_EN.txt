@@ -1,0 +1,4 @@
+ContextMenu_EN = {
+	ContextMenu_Electricity = "Electricity",
+	ContextMenu_LightSwitch = "Light switch",
+}

@@ -1,0 +1,4 @@
+ContextMenu_FR = {
+	ContextMenu_Electricity = "Electricite",
+	ContextMenu_LightSwitch = "Interrupteur",
+}
