@@ -1,18 +1,27 @@
-print("MOD DEBUG: LIGHT SWITCH MOD DEBUG LUA LOADED")
+local getSpecificPlayer = getSpecificPlayer
+local pairs = pairs
+local split = string.split
+local getItemNameFromFullType = getItemNameFromFullType
+local getSprite = getSprite
+local getFirstTypeEval = getFirstTypeEval
+local getItemCountFromTypeRecurse = getItemCountFromTypeRecurse
+local getText = getText
 
-BuildLight = {}
+print("MOD DEBUG: LIGHT ME UP MOD DEBUG LUA LOADED")
 
-BuildLight.neededMaterials = {}
-BuildLight.neededTools = {}
-BuildLight.toolsList = {}
-BuildLight.playerSkills = {}
+local LightMeUp = {}
+
+LightMeUp.neededMaterials = {}
+LightMeUp.neededTools = {}
+LightMeUp.toolsList = {}
+LightMeUp.playerSkills = {}
 
 local function predicateNotBroken(item)
     return not item:isBroken();
 end
 
 -- Make the Electricity menu aviable if the player have a screwdriver in their inventory
-BuildLight.doElecMenu = function(player, context, worldobjects, test)
+LightMeUp.doElecMenu = function(player, context, worldobjects, test)
     if test and ISWorldObjectContextMenu.Test then
         return true
     end
@@ -28,19 +37,20 @@ BuildLight.doElecMenu = function(player, context, worldobjects, test)
 
     local playerInv = player:getInventory();
 
-    BuildLight.getRoom(player)
+    LightMeUp.getRoom(player)
 
-    -- if (BuildLight.haveTool(player, "Screwdriver")) then
-        -- local electricityOption = context:addOption(getText("ContextMenu_Electricity"));
-        -- local subMenu = ISContextMenu:getNew(context);
-        -- context:addSubMenu(electricityOption, subMenu);
-        -- BuildLight.buildLightSwitchMenu(subMenu, player);
-    -- end
+    if (LightMeUp.haveTool(player, "Screwdriver")) then
+        local electricityOption = context:addOption(getText("ContextMenu_Electricity"));
+        local subMenu = ISContextMenu:getNew(context);
+        context:addSubMenu(electricityOption, subMenu);
+
+        LightMeUp.cellingLampMenu(subMenu, player);
+    end
 end
 
 -- @param player number : IsoPlayer index
 -- @param tool string   : Tool type
-BuildLight.equipToolPrimary = function(player, tool)
+LightMeUp.equipToolPrimary = function(player, tool)
     local tools = player:getInventory():getFirstTypeEval(tool, predicateNotBroken)
     if tools then
         ISInventoryPaneContextMenu.equipWeapon(tool, true, false, player)
@@ -50,7 +60,7 @@ end
 -- @param player number : IsoPlayer index
 -- @param tool string   : Tool type
 -- @return boolean      : if the player have the tool return true otherwise return false
-BuildLight.haveTool = function(player, tool)
+LightMeUp.haveTool = function(player, tool)
     local haveTools = nil
     if player:getInventory():containsTagEvalRecurse(tool, predicateNotBroken) then
         haveTools = true
@@ -61,7 +71,7 @@ BuildLight.haveTool = function(player, tool)
 end
 
 -- Count the material in the player inventory and adjacent containers and add it to the tooltip
-BuildLight.countMaterial = function(player, material, amount, tooltip)
+LightMeUp.countMaterial = function(player, material, amount, tooltip)
     local playerInv = player:getInventory()
     local type = split(material, "\\.")[2]
     local count = 0
@@ -73,6 +83,13 @@ BuildLight.countMaterial = function(player, material, amount, tooltip)
         for groundItemType, groundItemCount in pairs(groundItem) do
             if groundItemType == type then
                 count = count + groundItemCount
+            end
+        end
+
+        if material == "Base.Screws" then
+            count = count + playerInv:getItemCountFromTypeRecurse("Base.ScrewsBox") * 100
+            if groundItem["Base.ScrewsBox"] then
+                count = count + groundItem["Base.ScrewsBox"] * 100
             end
         end
 
@@ -89,18 +106,18 @@ BuildLight.countMaterial = function(player, material, amount, tooltip)
 end
 
 -- Test if tool is in inventory and add it to the tooltip
-BuildLight.tooltipCheckForTool = function(player, tool, tooltip)
-    local tool = player:getInventory():getFirstTypeEval("Screwdriver", predicateNotBroken)
-    if tool then
-        tooltip.description = tooltip.description .. " <RGB:1,1,1>" .. getItemNameFromFullType(tool) .. " <LINE>"
+LightMeUp.tooltipCheckForTool = function(player, tool, tooltip)
+    local tools = LightMeUp.haveTool(player, tool)
+    if tools then
+        tooltip.description = tooltip.description .. " <RGB:1,1,1>" .. getItemNameFromFullType(tools) .. " <LINE>"
         return true
     else
-        tooltip.description = tooltip.description .. " <RGB:1,0,0>" .. getItemNameFromFullType(tool) .. " <LINE>"
+        tooltip.description = tooltip.description .. " <RGB:1,0,0>" .. getItemNameFromFullType(tools) .. " <LINE>"
         return false
     end
 end
 
-BuildLight.canBuild = function(skills, option, player)
+LightMeUp.canBuild = function(skills, option, player)
     local tooltip = ISToolTip:new();
     tooltip:initialise()
     tooltip:setVisible(false)
@@ -112,9 +129,9 @@ BuildLight.canBuild = function(skills, option, player)
     tooltip.description = "" .. getText("Tooltip_craft_Needs") .. ": <LINE>";
 
     -- test all materials
-    for _, currentMaterial in pairs(BuildLight.neededMaterials) do
+    for _, currentMaterial in pairs(LightMeUp.neededMaterials) do
         if currentMaterial["Material"] and currentMaterial["Amount"] then
-            currentResult = BuildLight.countMaterial(player, currentMaterial["Material"], currentMaterial["Amount"],
+            currentResult = LightMeUp.countMaterial(player, currentMaterial["Material"], currentMaterial["Amount"],
                 tooltip)
         else
             tooltip.description = tooltip.description .. " <RGB:1,0,0> Error in required material definition. <LINE>"
@@ -127,8 +144,8 @@ BuildLight.canBuild = function(skills, option, player)
     end
 
     -- test for tool
-    for _, _currentTool in pairs(BuildLight.neededTools) do
-        result = BuildLight.tooltipCheckForTool(player, _currentTool, tooltip)
+    for _, _currentTool in pairs(LightMeUp.neededTools) do
+        result = LightMeUp.tooltipCheckForTool(player, _currentTool, tooltip)
 
         if not currentResult then
             result = false
@@ -137,13 +154,13 @@ BuildLight.canBuild = function(skills, option, player)
 
     -- test for skill
     for skill, level in pairs(skills) do
-        if (BuildLight.playerSkills[skill] < level) then
-            tooltip.description = tooltip.description .. " <RGB:1,0,0>" .. getText("IGUI_perks_Electricity") .. " " ..
-                                      player:getPerkLevel(Perks.Electricity) .. "/" .. electricityLvl .. " <LINE>";
+        if (LightMeUp.playerSkills[skill] < level) then
+            tooltip.description = tooltip.description .. " <RGB:1,0,0>" .. skill .. " " ..
+                                      player:getPerkLevel(skill) .. "/" .. level .. " <LINE>";
             result = false;
         else
-            tooltip.description = tooltip.description .. " <RGB:1,1,1>" .. getText("IGUI_perks_Electricity") .. " " ..
-                                      player:getPerkLevel(Perks.Electricity) .. "/" .. electricityLvl .. " <LINE>";
+            tooltip.description = tooltip.description .. " <RGB:1,1,1>" .. skill .. " " ..
+                                      player:getPerkLevel(skill) .. "/" .. level .. " <LINE>";
         end
     end
 
@@ -156,5 +173,11 @@ BuildLight.canBuild = function(skills, option, player)
     return tooltip;
 end
 
+-- Get MoreBuild instance
+-- @return table: MoreBuild table
+function getLightMeUpInstance()
+    return LightMeUp
+end
+
 -- register the OnFillWorldObjectContextMenu event
-Events.OnFillWorldObjectContextMenu.Add(BuildLight.doElecMenu);
+Events.OnFillWorldObjectContextMenu.Add(LightMeUp.doElecMenu);

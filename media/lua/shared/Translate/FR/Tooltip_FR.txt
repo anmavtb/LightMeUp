@@ -1,0 +1,7 @@
+Tooltip_FR = {
+    -- LightMeUp French translation
+	-- By: anmavtb
+	-- Date: April 29, 2022
+	Tooltip_Simple_Celling_Lamp = "Un simple plafonnier pour éclairer une pièce",
+    Tooltip_Metal_Celling_Lamp = "Un plafonnier en métal avec 4 ampoules",
+}

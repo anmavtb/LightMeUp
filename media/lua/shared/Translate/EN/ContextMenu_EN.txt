@@ -1,4 +1,8 @@
 ContextMenu_EN = {
+	-- LightMeUp English translation
+	-- By: anmavtb
+	-- Date: April 29, 2022
 	ContextMenu_Electricity = "Electricity",
-	ContextMenu_LightSwitch = "Light switch",
+	ContextMenu_Simple_Celling_Lamp = "Simple celling lamp",
+	ContextMenu_Metal_Celling_Lamp = "Metal celling lamp",
 }
