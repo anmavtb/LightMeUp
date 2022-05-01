@@ -1,8 +1,8 @@
 ContextMenu_FR = {
 	-- LightMeUp French translation
 	-- By: anmavtb
-	-- Date: April 29, 2022
-	ContextMenu_Electricity = "Electricite",
+	-- Date: May 01, 2022
+	ContextMenu_Electricity = "?lectricit?",
 	ContextMenu_Simple_Celling_Lamp = "Plafonnier simple",
-	ContextMenu_Metal_Celling_Lamp = "Plafonnier en métal",
+	ContextMenu_Metal_Celling_Lamp = "Plafonnier en m?tal",
 }

@@ -1,7 +1,7 @@
 Tooltip_EN = {
 	-- LightMeUp English translation
 	-- By: anmavtb
-	-- Date: April 29, 2022
+	-- Date: May 01, 2022
 	Tooltip_Simple_Celling_Lamp = "A simple celling lamp to light up a room",
     Tooltip_Metal_Celling_Lamp = "A metal celling lamp with 4 light bulbs",
 }

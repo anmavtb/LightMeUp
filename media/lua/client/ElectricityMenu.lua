@@ -2,7 +2,7 @@ local getSpecificPlayer = getSpecificPlayer
 local pairs = pairs
 local split = string.split
 local getItemNameFromFullType = getItemNameFromFullType
-local getSprite = getSprite
+local PerkFactory = PerkFactory
 local getFirstTypeEval = getFirstTypeEval
 local getItemCountFromTypeRecurse = getItemCountFromTypeRecurse
 local getText = getText
@@ -15,6 +15,8 @@ LightMeUp.neededMaterials = {}
 LightMeUp.neededTools = {}
 LightMeUp.toolsList = {}
 LightMeUp.playerSkills = {}
+LightMeUp.textSkillsRed = {}
+LightMeUp.textSkillsGreen = {}
 
 local function predicateNotBroken(item)
     return not item:isBroken();
@@ -30,21 +32,23 @@ LightMeUp.doElecMenu = function(player, context, worldobjects, test)
         return;
     end
 
-    local player = getSpecificPlayer(player)
-    if player:getVehicle() then
+    local playerObj = getSpecificPlayer(player)
+
+    if playerObj:getVehicle() then
         return
     end
 
-    local playerInv = player:getInventory();
+    local playerInv = playerObj:getInventory();
 
-    LightMeUp.getRoom(player)
+    if (LightMeUp.haveTool(playerObj, "Screwdriver")) then
 
-    if (LightMeUp.haveTool(player, "Screwdriver")) then
+        LightMeUp.buildSkillsList(playerObj)
+
         local electricityOption = context:addOption(getText("ContextMenu_Electricity"));
         local subMenu = ISContextMenu:getNew(context);
         context:addSubMenu(electricityOption, subMenu);
 
-        LightMeUp.cellingLampMenu(subMenu, player);
+        LightMeUp.cellingLampMenu(subMenu, playerObj);
     end
 end
 
@@ -57,12 +61,30 @@ LightMeUp.equipToolPrimary = function(player, tool)
     end
 end
 
+--
+LightMeUp.equipToolSecondary = function()
+
+end
+
+LightMeUp.buildSkillsList = function(player)
+    local perks = PerkFactory.PerkList
+    local perkID = nil
+    local perkType = nil
+    for i = 0, perks:size() - 1 do
+        perkID = perks:get(i):getId()
+        perkType = perks:get(i):getType()
+        LightMeUp.playerSkills[perkID] = player:getPerkLevel(perks:get(i))
+        LightMeUp.textSkillsRed[perkID] = " <RGB:1,0,0>" .. PerkFactory.getPerkName(perkType)
+        LightMeUp.textSkillsGreen[perkID] = " <RGB:1,1,1>" .. PerkFactory.getPerkName(perkType)
+    end
+end
+
 -- @param player number : IsoPlayer index
 -- @param tool string   : Tool type
 -- @return boolean      : if the player have the tool return true otherwise return false
 LightMeUp.haveTool = function(player, tool)
     local haveTools = nil
-    if player:getInventory():containsTagEvalRecurse(tool, predicateNotBroken) then
+    if player:getInventory():getFirstTagEvalRecurse(tool, predicateNotBroken) then
         haveTools = true
     else
         haveTools = false
@@ -78,7 +100,7 @@ LightMeUp.countMaterial = function(player, material, amount, tooltip)
     local groundItem = ISBuildMenu.materialOnGround
 
     if amount > 0 then
-        count = inv:getItemCountFromTypeRecurse(material)
+        count = playerInv:getItemCountFromTypeRecurse(material)
 
         for groundItemType, groundItemCount in pairs(groundItem) do
             if groundItemType == type then
@@ -108,13 +130,17 @@ end
 -- Test if tool is in inventory and add it to the tooltip
 LightMeUp.tooltipCheckForTool = function(player, tool, tooltip)
     local tools = LightMeUp.haveTool(player, tool)
+
     if tools then
-        tooltip.description = tooltip.description .. " <RGB:1,1,1>" .. getItemNameFromFullType(tools) .. " <LINE>"
+        tooltip.description = tooltip.description .. " <RGB:1,1,1>" .. getItemNameFromFullType("Base." .. tool) ..
+                                  " <LINE>"
         return true
     else
-        tooltip.description = tooltip.description .. " <RGB:1,0,0>" .. getItemNameFromFullType(tools) .. " <LINE>"
+        tooltip.description = tooltip.description .. " <RGB:1,0,0>" .. getItemNameFromFullType("Base." .. tool) ..
+                                  " <LINE>"
         return false
     end
+    return false
 end
 
 LightMeUp.canBuild = function(skills, option, player)
@@ -128,7 +154,7 @@ LightMeUp.canBuild = function(skills, option, player)
 
     tooltip.description = "" .. getText("Tooltip_craft_Needs") .. ": <LINE>";
 
-    -- test all materials
+    -- test for materials
     for _, currentMaterial in pairs(LightMeUp.neededMaterials) do
         if currentMaterial["Material"] and currentMaterial["Amount"] then
             currentResult = LightMeUp.countMaterial(player, currentMaterial["Material"], currentMaterial["Amount"],
@@ -154,13 +180,13 @@ LightMeUp.canBuild = function(skills, option, player)
 
     -- test for skill
     for skill, level in pairs(skills) do
-        if (LightMeUp.playerSkills[skill] < level) then
-            tooltip.description = tooltip.description .. " <RGB:1,0,0>" .. skill .. " " ..
-                                      player:getPerkLevel(skill) .. "/" .. level .. " <LINE>";
-            result = false;
+        if (LightMeUp.playerSkills[skill] >= level) then
+            tooltip.description = tooltip.description .. LightMeUp.textSkillsGreen[skill] .. " " ..
+                                      LightMeUp.playerSkills[skill] .. "/" .. level .. " <LINE>";
         else
-            tooltip.description = tooltip.description .. " <RGB:1,1,1>" .. skill .. " " ..
-                                      player:getPerkLevel(skill) .. "/" .. level .. " <LINE>";
+            tooltip.description = tooltip.description .. LightMeUp.textSkillsRed[skill] .. " " ..
+                                      LightMeUp.playerSkills[skill] .. "/" .. level .. " <LINE>";
+            result = false;
         end
     end
 
@@ -169,12 +195,10 @@ LightMeUp.canBuild = function(skills, option, player)
         option.notAvailable = true
     end
 
-    toolTip.footNote = getText("Tooltip_craft_pressToRotate", Keyboard.getKeyName(getCore():getKey("Rotate building")));
+    tooltip.footNote = getText("Tooltip_craft_pressToRotate", Keyboard.getKeyName(getCore():getKey("Rotate building")));
     return tooltip;
 end
 
--- Get MoreBuild instance
--- @return table: MoreBuild table
 function getLightMeUpInstance()
     return LightMeUp
 end
