@@ -4,6 +4,12 @@ end
 
 local LightMeUp = getLightMeUpInstance()
 
+function LightMeUp.loadTextures()
+    getTexture('item_CellingLamp1.png');
+end
+
+Events.OnGameBoot.Add(LightMeUp.loadTextures);
+
 LightMeUp.cellingLampMenu = function(subMenu, player)
     local _sprite = nil
     local _option = nil
@@ -33,14 +39,14 @@ LightMeUp.cellingLampMenu = function(subMenu, player)
     }
 
     _sprite = {}
-    _sprite.sprite = "item_CellingLamp1.png"
+    _sprite.sprite = "media/textures/item_CellingLamp1.png"
 
     _name = getText "ContextMenu_Simple_Celling_Lamp"
     _option = subMenu:addOption(_name, nil, LightMeUp.onBuildSimpleCellingLamp, _sprite, player, _name)
     _tooltip = LightMeUp.canBuild(needSkills, _option, player)
     _tooltip:setName(_name)
     _tooltip.description = getText("Tooltip_Simple_Celling_Lamp") .. "<LINE> <LINE>" .. _tooltip.description
-    _tooltip:setTexture(_sprite.sprite)
+    _tooltip:setTexture("media/textures/item_CellingLamp1.png")
 
     -- Metal Celling Lamp --
 
@@ -66,20 +72,20 @@ LightMeUp.cellingLampMenu = function(subMenu, player)
     }
 
     _sprite = {}
-    _sprite.sprite = getTexture("item_CellingLamp1.png")
+    _sprite.sprite = "media/textures/item_CellingLamp1.png"
 
     _name = getText "ContextMenu_Metal_Celling_Lamp"
     _option = subMenu:addOption(_name, nil, LightMeUp.onBuildMetalCellingLamp, _sprite, player, _name)
     _tooltip = LightMeUp.canBuild(needSkills, _option, player)
     _tooltip:setName(_name)
     _tooltip.description = getText("Tooltip_Metal_Celling_Lamp") .. "<LINE> <LINE>" .. _tooltip.description
-    _tooltip:setTexture(_sprite.sprite)
+    _tooltip:setTexture("media/textures/item_CellingLamp1.png")
 
 end
 
 -- SIMPLE CELLING LAMP
 LightMeUp.onBuildSimpleCellingLamp = function(ignoreThisArgument, sprite, player, name)
-    local _SimpleCellingLamp = ISLightSource:new(sprite.sprite, sprite.sprite, getSpecificPlayer(player))
+    local _SimpleCellingLamp = ISLightSource:new(sprite.sprite, sprite.sprite, player)
 
     _SimpleCellingLamp.player = player
     _SimpleCellingLamp.name = name
@@ -88,6 +94,8 @@ LightMeUp.onBuildSimpleCellingLamp = function(ignoreThisArgument, sprite, player
 
     _SimpleCellingLamp.offsetX = 0
     _SimpleCellingLamp.offsetY = 0
+    _SimpleCellingLamp.fuel = 'Base.Battery'
+    _SimpleCellingLamp.baseItem = 'Base.LightBulb'
     _SimpleCellingLamp.radius = 10
 
     _SimpleCellingLamp.modData["need:Base.LightBulb"] = 1
@@ -97,12 +105,15 @@ LightMeUp.onBuildSimpleCellingLamp = function(ignoreThisArgument, sprite, player
     _SimpleCellingLamp.modData["xp:Electricity"] = 5
     _SimpleCellingLamp.modData["IsLighting"] = true
 
-    getCell():setDrag(_SimpleCellingLamp, player)
+    print()
+    print(name, " | ", sprite.sprite)
+
+    getCell():setDrag(_SimpleCellingLamp, player:getPlayerNum())
 end
 
 -- METAL CELLING LAMP
 LightMeUp.onBuildMetalCellingLamp = function(ignoreThisArgument, sprite, player, name)
-    local _MetalCellingLamp = ISLightSource:new(sprite.sprite, sprite.sprite, getSpecificPlayer(player))
+    local _MetalCellingLamp = ISLightSource:new(sprite.sprite, sprite.sprite, player)
 
     _MetalCellingLamp.player = player
     _MetalCellingLamp.name = name
@@ -115,17 +126,23 @@ LightMeUp.onBuildMetalCellingLamp = function(ignoreThisArgument, sprite, player,
 
     _MetalCellingLamp.offsetX = 0
     _MetalCellingLamp.offsetY = 0
+    _MetalCellingLamp.fuel = 'Base.Battery'
+    _MetalCellingLamp.baseItem = 'Base.LightBulb'
     _MetalCellingLamp.radius = 20
 
-    _MetalCellingLamp.modData["need:Base.LightBulb"] = 1
-    _MetalCellingLamp.modData["need:Radio.ElectricWire"] = 1
-    _MetalCellingLamp.modData["need:Base.Aluminum"] = 2
+    _MetalCellingLamp.modData["need:Base.LightBulb"] = 4
+    _MetalCellingLamp.modData["need:Radio.ElectricWire"] = 8
+    _MetalCellingLamp.modData["need:Base.SmallSheetMetal"] = 2
     _MetalCellingLamp.modData["need:Base.Screws"] = 4
     _MetalCellingLamp.modData["use:Base.BlowTorch"] = 10
-    _MetalCellingLamp.modData["xp:Electricity"] = 5
+    _MetalCellingLamp.modData["xp:MetalWelding"] = 10
+    _MetalCellingLamp.modData["xp:Electricity"] = 10
     _MetalCellingLamp.modData["IsLighting"] = true
 
-    getCell():setDrag(_MetalCellingLamp, player)
+    print()
+    print(name, " | ", sprite.sprite)
+
+    getCell():setDrag(_MetalCellingLamp, player:getPlayerNum())
 end
 
 -- function ISLightSource:isValid(square)
