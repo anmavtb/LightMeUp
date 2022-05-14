@@ -1,14 +1,14 @@
 if not getLightMeUpInstance then
-    require("ElectricityMenu")
+    require("LMUBuildMenu")
 end
 
 local LightMeUp = getLightMeUpInstance()
 
 function LightMeUp.loadTextures()
-    getTexture('item_CellingLamp1.png');
+    getTexture('item_CellingLamp1.png')
 end
 
-Events.OnGameBoot.Add(LightMeUp.loadTextures);
+Events.OnGameBoot.Add(LightMeUp.loadTextures)
 
 LightMeUp.cellingLampMenu = function(subMenu, player)
     local _sprite = nil
@@ -85,16 +85,16 @@ end
 
 -- SIMPLE CELLING LAMP
 LightMeUp.onBuildSimpleCellingLamp = function(ignoreThisArgument, sprite, player, name)
-    local _SimpleCellingLamp = ISLightSource:new(sprite.sprite, sprite.sprite, player)
+    local _SimpleCellingLamp = LMUCellingLamp:new(sprite.sprite, sprite.sprite, player)
 
     _SimpleCellingLamp.player = player
     _SimpleCellingLamp.name = name
-    _SimpleCellingLamp.canPassThrough = true
-    _SimpleCellingLamp.needRoof = true
+    -- _SimpleCellingLamp.canPassThrough = true
+    -- _SimpleCellingLamp.needRoof = true
 
     _SimpleCellingLamp.offsetX = 0
     _SimpleCellingLamp.offsetY = 0
-    _SimpleCellingLamp.fuel = 'Base.Battery'
+    _SimpleCellingLamp.fuel = nil
     _SimpleCellingLamp.baseItem = 'Base.LightBulb'
     _SimpleCellingLamp.radius = 10
 
@@ -105,20 +105,17 @@ LightMeUp.onBuildSimpleCellingLamp = function(ignoreThisArgument, sprite, player
     _SimpleCellingLamp.modData["xp:Electricity"] = 5
     _SimpleCellingLamp.modData["IsLighting"] = true
 
-    print()
-    print(name, " | ", sprite.sprite)
-
     getCell():setDrag(_SimpleCellingLamp, player:getPlayerNum())
 end
 
 -- METAL CELLING LAMP
 LightMeUp.onBuildMetalCellingLamp = function(ignoreThisArgument, sprite, player, name)
-    local _MetalCellingLamp = ISLightSource:new(sprite.sprite, sprite.sprite, player)
+    local _MetalCellingLamp = LMUCellingLamp:new(sprite.sprite, sprite.sprite, player)
 
     _MetalCellingLamp.player = player
     _MetalCellingLamp.name = name
-    _MetalCellingLamp.canPassThrough = true
-    _MetalCellingLamp.needRoof = true
+    -- _MetalCellingLamp.canPassThrough = true
+    -- _MetalCellingLamp.needRoof = true
 
     _MetalCellingLamp.completionSound = "BuildMetalStructureSmallScrap"
     _MetalCellingLamp.craftingBank = "BlowTorch"
@@ -126,7 +123,7 @@ LightMeUp.onBuildMetalCellingLamp = function(ignoreThisArgument, sprite, player,
 
     _MetalCellingLamp.offsetX = 0
     _MetalCellingLamp.offsetY = 0
-    _MetalCellingLamp.fuel = 'Base.Battery'
+    _MetalCellingLamp.fuel = nil
     _MetalCellingLamp.baseItem = 'Base.LightBulb'
     _MetalCellingLamp.radius = 20
 
@@ -139,19 +136,5 @@ LightMeUp.onBuildMetalCellingLamp = function(ignoreThisArgument, sprite, player,
     _MetalCellingLamp.modData["xp:Electricity"] = 10
     _MetalCellingLamp.modData["IsLighting"] = true
 
-    print()
-    print(name, " | ", sprite.sprite)
-
     getCell():setDrag(_MetalCellingLamp, player:getPlayerNum())
 end
-
--- function ISLightSource:isValid(square)
---     if self.needRoof then
---         for i = 0, square:getObjects():size() - 1 do
---             local obj = square:getObjects():get(i);
---             if (square.haveRoof) then
---                 return true;
---             end
---         end
---     end
--- end

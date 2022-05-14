@@ -19,7 +19,7 @@ LightMeUp.textSkillsRed = {}
 LightMeUp.textSkillsGreen = {}
 
 local function predicateNotBroken(item)
-    return not item:isBroken();
+    return not item:isBroken()
 end
 
 -- Make the Electricity menu aviable if the player have a screwdriver in their inventory
@@ -29,7 +29,7 @@ LightMeUp.doElecMenu = function(player, context, worldobjects, test)
     end
 
     if getCore():getGameMode() == "LastStand" then
-        return;
+        return
     end
 
     local playerObj = getSpecificPlayer(player)
@@ -38,17 +38,17 @@ LightMeUp.doElecMenu = function(player, context, worldobjects, test)
         return
     end
 
-    local playerInv = playerObj:getInventory();
+    local playerInv = playerObj:getInventory()
 
     if (LightMeUp.haveTool(playerObj, "Screwdriver")) then
 
         LightMeUp.buildSkillsList(playerObj)
 
-        local electricityOption = context:addOption(getText("ContextMenu_Electricity"));
-        local subMenu = ISContextMenu:getNew(context);
-        context:addSubMenu(electricityOption, subMenu);
+        local electricityOption = context:addOption(getText("ContextMenu_Electricity"))
+        local subMenu = ISContextMenu:getNew(context)
+        context:addSubMenu(electricityOption, subMenu)
 
-        LightMeUp.cellingLampMenu(subMenu, playerObj);
+        LightMeUp.cellingLampMenu(subMenu, playerObj)
     end
 end
 
@@ -144,15 +144,15 @@ LightMeUp.tooltipCheckForTool = function(player, tool, tooltip)
 end
 
 LightMeUp.canBuild = function(skills, option, player)
-    local tooltip = ISToolTip:new();
+    local tooltip = ISToolTip:new()
     tooltip:initialise()
     tooltip:setVisible(false)
-    option.toolTip = tooltip;
+    option.toolTip = tooltip
 
-    local result = true;
-    local currentResult = true;
+    local result = true
+    local currentResult = true
 
-    tooltip.description = "" .. getText("Tooltip_craft_Needs") .. ": <LINE>";
+    tooltip.description = "" .. getText("Tooltip_craft_Needs") .. ": <LINE>"
 
     -- test for materials
     for _, currentMaterial in pairs(LightMeUp.neededMaterials) do
@@ -182,11 +182,11 @@ LightMeUp.canBuild = function(skills, option, player)
     for skill, level in pairs(skills) do
         if (LightMeUp.playerSkills[skill] >= level) then
             tooltip.description = tooltip.description .. LightMeUp.textSkillsGreen[skill] .. " " ..
-                                      LightMeUp.playerSkills[skill] .. "/" .. level .. " <LINE>";
+                                      LightMeUp.playerSkills[skill] .. "/" .. level .. " <LINE>"
         else
             tooltip.description = tooltip.description .. LightMeUp.textSkillsRed[skill] .. " " ..
-                                      LightMeUp.playerSkills[skill] .. "/" .. level .. " <LINE>";
-            result = false;
+                                      LightMeUp.playerSkills[skill] .. "/" .. level .. " <LINE>"
+            result = false
         end
     end
 
@@ -195,8 +195,8 @@ LightMeUp.canBuild = function(skills, option, player)
         option.notAvailable = true
     end
 
-    tooltip.footNote = getText("Tooltip_craft_pressToRotate", Keyboard.getKeyName(getCore():getKey("Rotate building")));
-    return tooltip;
+    tooltip.footNote = getText("Tooltip_craft_pressToRotate", Keyboard.getKeyName(getCore():getKey("Rotate building")))
+    return tooltip
 end
 
 function getLightMeUpInstance()
@@ -204,4 +204,4 @@ function getLightMeUpInstance()
 end
 
 -- register the OnFillWorldObjectContextMenu event
-Events.OnFillWorldObjectContextMenu.Add(LightMeUp.doElecMenu);
+Events.OnFillWorldObjectContextMenu.Add(LightMeUp.doElecMenu)
