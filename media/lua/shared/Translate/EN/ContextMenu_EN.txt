@@ -1,0 +1,6 @@
+ContextMenu_EN = {
+	-- LightMeUp English translation
+	-- By: anmavtb
+	-- Date: November 29, 2022
+	ContextMenu_Electricity = "Electricity",
+}

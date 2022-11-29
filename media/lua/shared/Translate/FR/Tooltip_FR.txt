@@ -1,0 +1,5 @@
+Tooltip_FR = {
+    -- LightMeUp French translation
+	-- By: anmavtb
+	-- Date: November 29, 2022
+}

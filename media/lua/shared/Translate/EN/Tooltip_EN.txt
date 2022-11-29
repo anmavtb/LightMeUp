@@ -1,0 +1,5 @@
+Tooltip_EN = {
+	-- LightMeUp English translation
+	-- By: anmavtb
+	-- Date: November 29, 2022
+}
